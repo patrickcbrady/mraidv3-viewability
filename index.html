@@ -12,6 +12,7 @@
         <script>
             if (typeof mraid === 'undefined') {
                 console.warn("ERROR: no MRAID Object");
+                initViewabilityChart();
             }
             else {
                 var initialState = mraid.getState();
