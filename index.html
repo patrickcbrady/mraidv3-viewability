@@ -9,20 +9,6 @@
             <canvas id="viewabilityChart" width="300" height="250"></canvas>
         </div>
         <script type="text/javascript" src="viewabilityChart.js"></script>
-        <script>
-            if (typeof mraid === 'undefined') {
-                console.warn("ERROR: no MRAID Object");
-                initViewabilityChart();
-            }
-            else {
-                var initialState = mraid.getState();
-                if (initialState === 'loading') {
-                    mraid.addEventListener('ready', initViewabilityChart);
-                }
-                else if (initialState === 'default') {
-                    initViewabilityChart();
-                }
-            }
-        </script>
+        <script type="text/javascript" src="ad.js"></script>
     </body>
 </html>
