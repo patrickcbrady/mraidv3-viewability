@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <script src="mraid.js"></script>
+        <link rel="stylesheet" type="text/css" href="ad.css">
+    </head>
+    <body>
+        <script type="text/javascript" src="Chart.js"></script>
+        <div style="width:300px;height:250px;">
+            <canvas id="viewabilityChart" width="300" height="250"></canvas>
+        </div>
+        <script type="text/javascript" src="viewabilityChart.js"></script>
+        <script>
+            if (typeof mraid === 'undefined') {
+                console.warn("ERROR: no MRAID Object");
+            }
+            else {
+                var initialState = mraid.getState();
+                if (initialState === 'loading') {
+                    mraid.addEventListener('ready', initViewabilityChart);
+                }
+                else if (initialState === 'default') {
+                    initViewabilityChart();
+                }
+            }
+        </script>
+    </body>
+</html>
