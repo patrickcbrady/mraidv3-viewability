@@ -14542,9 +14542,54 @@ function checkViewabilityCompliance() {
             viewabilityChart.update();
         };
 
-        mraid.addEventListener("exposureChange", function(exposedPercentage, visibleRectangle, occlusionRectangles) {
+        var validateExposureChange = function(expPercent, visRect, occRects) {
+            var validEP = isEPValid(expPercent);
+            var validVR = isValidRect(visRect);
+            var validOR = isORValid(occRects);
+            if (!(validEP && validVR && validOR)) {
+                var reasons = [];
+                if (!validEP) reasons.push("exposedPercentage parameter does not match IAB specification")
+                if (!validVR) reasons.push("visibleRectangle parameter does not match IAB specification");
+                if (!validOR) reasons.push("occlusionRectangles parameter does not match IAB specification");
+                reasons = reasons.join(" and ");
+                displayMessage("exposureChange event is not compliant with IAB specification because " + reasons);
+            }
+        }
+
+        var isNumber = function(obj) {
+            return typeof obj === 'number';
+        };
+
+        var isObject = function(obj) {
+            return typeof obj === 'object' && obj !== null;
+        };
+
+        var isEPValid = function(expPercent) {
+            return isNumber(expPercent) && expPercent >= 0 && expPercent <= 100;
+        }
+
+        var isValidRect = function(visRect) {
+            return visRect === null || (isObject(visRect) && isNumber(visRect.x) && isNumber(visRect.y) && isNumber(visRect.width) && isNumber(visRect.height));
+        };
+
+        var isORValid = function(occRects) {
+            return isEmptyRectContainer(occRects) || isValidRectContainer(occRects);
+        };
+
+        var isEmptyRectContainer = function(rects) {
+             return (typeof rects === 'undefined' || rects === null || Object.keys(rects).length === 0);
+        };
+
+        var isValidRectContainer = function(rects) {
+            return isValidRect(rects[0]);
+        };
+
+        var handleExposureChange = function(exposedPercentage, visibleRectangle, occlusionRectangles) {
+            validateExposureChange(exposedPercentage, visibleRectangle, occlusionRectangles);
             addData(exposedPercentage);
-        });
+        };
+
+        mraid.addEventListener("exposureChange", handleExposureChange);
     };
 
     initViewabilityChart();
