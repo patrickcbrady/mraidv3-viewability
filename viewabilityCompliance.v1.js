@@ -14439,20 +14439,6 @@ function displayMessage(msg) {
     p.appendChild(node);
     div.appendChild(p);
     mainDiv.appendChild(div);
-    //vCenter(p);
-}
-
-function vCenterElement(el) {
-    var parentRect = el.parentElement.getBoundingClientRect();
-    var elRect = el.getBoundingClientRect();
-    var elTop = (parentRect.height / 2) - (elRect.height / 2);
-    el.style.top = elTop + "px";
-}
-function vCenter(el) {
-    var parentHeight = el.parentElement.clientHeight;
-    var elHeight = el.clientHeight;
-    var elTop = (parentHeight / 2) - (elHeight / 2);
-    el.style.top = elTop + "px";
 }
 
 function getMainDiv() {
