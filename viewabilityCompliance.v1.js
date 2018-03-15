@@ -14383,10 +14383,6 @@ module.exports = function(Chart) {
 },{"1":1,"25":25,"45":45}]},{},[7])(7)
 });
 
-function init(cb) {
-    injectMRAIDTag();
-    setTimeout(cb, 0);
-}
 
 function main() {
     if (isValidEnvironment()) {
@@ -14404,8 +14400,11 @@ function injectMRAIDTag() {
 }
 
 function isValidEnvironment() {
-    if (typeof mraid === "undefined") return false;
-    return (isVersionValid() && isEnvObjectPresent());
+    return (isMraidObjectPresent() && isVersionValid() && isEnvObjectPresent());
+}
+
+function isMraidObjectPresent() {
+    return typeof mraid !== "undefined";
 }
 
 function isVersionValid() {
@@ -14417,26 +14416,30 @@ function isEnvObjectPresent() {
 }
 
 function getFallbackReason() {
+    if (!isMraidObjectPresent()) return "mraid object is undefined";
     var reasons = [];
     if (!isEnvObjectPresent()) reasons.push("MRAID_ENV object is not present");
     if (!isVersionValid()) reasons.push("MRAID Version is not 3 or higher");
     return reasons.join(" and ");
 }
 
-function fallback(reason) {
-    clearBody();
+function fallback() {
     displayMessage("Environment is not MRAIDV3 Compatible because " + getFallbackReason());
 }
 
 function displayMessage(msg) {
+    clearMainDiv();
+    var mainDiv = getMainDiv();
     var div = getBlankDiv();
     var p = document.createElement("p");
     p.style.position = "relative";
+    p.style.fontSize = "50px";
+    p.style.textAlign = "center";
     var node = document.createTextNode(msg);
     p.appendChild(node);
     div.appendChild(p);
-    document.body.appendChild(div);
-    vCenterElement(p);
+    mainDiv.appendChild(div);
+    //vCenter(p);
 }
 
 function vCenterElement(el) {
@@ -14445,35 +14448,74 @@ function vCenterElement(el) {
     var elTop = (parentRect.height / 2) - (elRect.height / 2);
     el.style.top = elTop + "px";
 }
+function vCenter(el) {
+    var parentHeight = el.parentElement.clientHeight;
+    var elHeight = el.clientHeight;
+    var elTop = (parentHeight / 2) - (elHeight / 2);
+    el.style.top = elTop + "px";
+}
 
-function clearBody () {
-    var body = document.body;
-    while (body.firstChild) {
-        body.removeChild(body.firstChild);
+function getMainDiv() {
+    var mainDiv = document.querySelector(".main-div");
+    if (!mainDiv) {
+        mainDiv = initMainDiv();
     }
+    return mainDiv;
+}
+
+function clearMainDiv() {
+    var mainDiv = getMainDiv();
+    clearElement(mainDiv);
+}
+
+function clearElement(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+function initMainDiv() {
+    var mainDiv = document.createElement("div");
+    mainDiv.classList.add("main-div");
+    mainDiv.style.position = "relative";
+    mainDiv.style.width = "100%";
+    mainDiv.style.height = "100%";
+    mainDiv.style.backgroundColor = "rgba(0,0,255,1)";
+    document.body.appendChild(mainDiv);
+    return mainDiv;
 }
 
 function getBlankDiv() {
     var div = document.createElement("div");
     div.style.width = "100%";
     div.style.height = "100%";
+    div.style.position = "relative";
     div.style.backgroundColor = "rgba(255,255,255,1)";
     return div;
 }
 
+function mraidInit() {
+    initMainDiv();
+    if (mraid.getState() === 'loading') {
+        mraid.addEventListener('ready', main);
+    }
+    else {
+        main();
+    }
+}
+
 function checkViewabilityCompliance() {
     var initPage = function() {
-        clearBody();
+        clearMainDiv();
         addChartToPage();
     };
     var addChartToPage = function() {
         var div = getBlankDiv();
+        var mainDiv = getMainDiv();
         var canvas = document.createElement("canvas");
         canvas.id = "viewabilityChart";
-        canvas.width = "300";
-        canvas.height = "250";
         div.appendChild(canvas);
-        document.body.appendChild(div);
+        mainDiv.appendChild(div);
     };
 
     var initViewabilityChart = function() {
@@ -14493,6 +14535,7 @@ function checkViewabilityCompliance() {
                 }]
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     yAxes: [{
                         ticks: {
@@ -14513,16 +14556,12 @@ function checkViewabilityCompliance() {
             viewabilityChart.update();
         };
 
-        setInterval(addRandomData, 1000);
+        mraid.addEventListener("exposureChange", function(exposedPercentage, visibleRectangle, occlusionRectangles) {
+            addData(exposedPercentage);
+        });
     };
 
-    var initialState = mraid.getState();
-    if (initialState === 'loading') {
-      mraid.addEventListener('ready', initViewabilityChart);
-    }
-    else if (initialState === 'default') {
-      initViewabilityChart();
-    }
+    initViewabilityChart();
 }
 
-init(main);
+mraidInit();
