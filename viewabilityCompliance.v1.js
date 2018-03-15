@@ -14393,6 +14393,10 @@ function main() {
     }
 }
 
+function isMRAIDTagPresent() {
+    return document.querySelector('script[src="mraid.js"]');
+}
+
 function injectMRAIDTag() {
     var script = document.createElement("script");
     script.src = "mraid.js";
@@ -14481,6 +14485,7 @@ function getBlankDiv() {
 }
 
 function mraidInit() {
+    if (!isMRAIDTagPresent()) injectMRAIDTag();
     initMainDiv();
     if (mraid.getState() === 'loading') {
         mraid.addEventListener('ready', main);
