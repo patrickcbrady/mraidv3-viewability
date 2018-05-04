@@ -14548,6 +14548,7 @@ function checkViewabilityCompliance() {
         };
 
         var validateExposureChange = function(expPercent, visRect, occRects) {
+          console.log("validating exposureChange");
             var validEP = isEPValid(expPercent);
             var validVR = isValidRect(visRect);
             var validOR = isORValid(occRects);
@@ -14600,4 +14601,9 @@ function checkViewabilityCompliance() {
     initViewabilityChart();
 }
 
-mraidInit();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mraidInit)
+}
+else {
+  mraidInit();
+}
